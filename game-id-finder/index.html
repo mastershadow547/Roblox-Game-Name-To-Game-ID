@@ -239,14 +239,14 @@
   <div class="panel">
     <p class="kicker">roblox tools</p>
     <h1>Find a game's ID</h1>
-    <p class="sub">Type the exact game name as it appears on Roblox. We'll pull the universe ID and place ID straight from the catalog.</p>
+    <p class="sub">Paste the link to a Roblox game's page (or just its numeric place ID). We'll pull the universe ID and place ID straight from the catalog — no guessing on names required.</p>
 
     <form id="lookupForm">
-      <input type="text" id="gameInput" placeholder="e.g. Adopt Me!" autocomplete="off" required>
+      <input type="text" id="gameInput" placeholder="roblox.com/games/920587237/Adopt-Me" autocomplete="off" required>
       <button type="submit" id="submitBtn">Search</button>
     </form>
 
-    <div class="status-line" id="statusLine"></div>
+    <div class="status-line" id="statusLine">Tip: open the game on roblox.com and copy the URL from your address bar.</div>
 
     <div class="result" id="result">
       <div class="result-top">
@@ -274,7 +274,7 @@
       </div>
     </div>
 
-    <footer>built for anyone · data via Roblox public API</footer>
+    <footer>data via Roblox public API</footer>
   </div>
 </div>
 
