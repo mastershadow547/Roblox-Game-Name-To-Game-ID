@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game ID // Lookup</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+  :root{
+    --bg: #0d1117;
+    --bg-raised: #131a24;
+    --line: #1f2937;
+    --green: #39ff88;
+    --green-dim: #1f7a4a;
+    --amber: #ffb454;
+    --text: #d7dde5;
+    --text-dim: #6b7684;
+    --red: #ff5f56;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html, body{
+    margin:0;
+    padding:0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    min-height: 100vh;
+  }
+
+  body{
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 32px 32px;
+    background-position: -1px -1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .crt{
+    width: 100%;
+    max-width: 620px;
+  }
+
+  .titlebar{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding: 10px 14px;
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-bottom: none;
+    border-radius: 10px 10px 0 0;
+  }
+  .dot{ width:10px; height:10px; border-radius:50%; }
+  .dot.r{ background:#ff5f56; }
+  .dot.y{ background:#ffbd2e; }
+  .dot.g{ background:#27c93f; }
+  .titlebar span{
+    margin-left: 8px;
+    color: var(--text-dim);
+    font-size: 12px;
+    letter-spacing: .02em;
+  }
+
+  .panel{
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: 0 0 10px 10px;
+    padding: 40px 36px 36px;
+  }
+
+  .kicker{
+    font-family: 'Space Grotesk', sans-serif;
+    color: var(--green);
+    font-size: 13px;
+    font-weight: 600;
+    margin: 0 0 6px;
+  }
+  .kicker::before{ content: "> "; color: var(--green-dim); }
+
+  h1{
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 30px;
+    line-height: 1.15;
+    font-weight: 700;
+    margin: 0 0 10px;
+    color: #fff;
+  }
+
+  p.sub{
+    color: var(--text-dim);
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 0 0 30px;
+    max-width: 46ch;
+  }
+
+  form{
+    display:flex;
+    gap: 10px;
+  }
+
+  input[type="text"]{
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 14px 16px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    outline: none;
+    transition: border-color .15s ease;
+  }
+  input[type="text"]::placeholder{ color: #3d4551; }
+  input[type="text"]:focus{ border-color: var(--green-dim); }
+
+  button{
+    background: var(--green);
+    color: #04150a;
+    border: none;
+    border-radius: 6px;
+    padding: 0 22px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: filter .15s ease, transform .05s ease;
+  }
+  button:hover{ filter: brightness(1.1); }
+  button:active{ transform: translateY(1px); }
+  button:disabled{ background: var(--green-dim); cursor: wait; color: #0a2416; }
+
+  .status-line{
+    margin-top: 18px;
+    font-size: 12.5px;
+    color: var(--text-dim);
+    min-height: 18px;
+  }
+  .status-line.err{ color: var(--red); }
+
+  .result{
+    margin-top: 22px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--bg);
+    display: none;
+    overflow: hidden;
+  }
+  .result.show{ display: block; animation: reveal .25s ease; }
+
+  @keyframes reveal{
+    from{ opacity: 0; transform: translateY(-4px); }
+    to{ opacity: 1; transform: translateY(0); }
+  }
+
+  .result-top{
+    display:flex;
+    gap: 14px;
+    padding: 16px 18px;
+    border-bottom: 1px dashed var(--line);
+  }
+  .result-top img{
+    width: 64px;
+    height: 64px;
+    border-radius: 6px;
+    border: 1px solid var(--line);
+    object-fit: cover;
+    background: #000;
+  }
+  .result-meta{ min-width: 0; }
+  .result-meta .name{
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    color: #fff;
+    font-size: 15px;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .result-meta .stat{
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+  .result-meta .stat b{ color: var(--amber); font-weight: 600; }
+
+  .id-rows{ padding: 4px 0; }
+  .id-row{
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    padding: 12px 18px;
+  }
+  .id-row + .id-row{ border-top: 1px solid var(--line); }
+  .id-row .label{
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: .04em;
+  }
+  .id-row .value{
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--green);
+  }
+  .copy-btn{
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--text-dim);
+    padding: 5px 10px;
+    font-size: 11px;
+    border-radius: 5px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .copy-btn:hover{ color: var(--text); border-color: var(--text-dim); }
+
+  footer{
+    margin-top: 22px;
+    text-align: center;
+    font-size: 11px;
+    color: #444d59;
+  }
+  footer a{ color: #5c6672; }
+</style>
+</head>
+<body>
+
+<div class="crt">
+  <div class="titlebar">
+    <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+    <span>gameid-lookup — bash</span>
+  </div>
+  <div class="panel">
+    <p class="kicker">roblox tools</p>
+    <h1>Find a game's ID</h1>
+    <p class="sub">Type the exact game name as it appears on Roblox. We'll pull the universe ID and place ID straight from the catalog.</p>
+
+    <form id="lookupForm">
+      <input type="text" id="gameInput" placeholder="e.g. Adopt Me!" autocomplete="off" required>
+      <button type="submit" id="submitBtn">Search</button>
+    </form>
+
+    <div class="status-line" id="statusLine"></div>
+
+    <div class="result" id="result">
+      <div class="result-top">
+        <img id="resultIcon" src="" alt="">
+        <div class="result-meta">
+          <div class="name" id="resultName">—</div>
+          <div class="stat"><b id="resultPlaying">0</b> playing now</div>
+        </div>
+      </div>
+      <div class="id-rows">
+        <div class="id-row">
+          <span class="label">UNIVERSE ID</span>
+          <span style="display:flex; align-items:center; gap:10px;">
+            <span class="value" id="universeId">—</span>
+            <button class="copy-btn" data-copy="universeId">copy</button>
+          </span>
+        </div>
+        <div class="id-row">
+          <span class="label">PLACE ID</span>
+          <span style="display:flex; align-items:center; gap:10px;">
+            <span class="value" id="placeId">—</span>
+            <button class="copy-btn" data-copy="placeId">copy</button>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <footer>built for Vuuk Studios · data via Roblox public API</footer>
+  </div>
+</div>
+
+<script>
+const form = document.getElementById('lookupForm');
+const input = document.getElementById('gameInput');
+const btn = document.getElementById('submitBtn');
+const statusLine = document.getElementById('statusLine');
+const result = document.getElementById('result');
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const query = input.value.trim();
+  if (!query) return;
+
+  btn.disabled = true;
+  btn.textContent = 'Searching...';
+  statusLine.classList.remove('err');
+  statusLine.textContent = 'Querying Roblox catalog...';
+  result.classList.remove('show');
+
+  try {
+    const res = await fetch(`/api/lookup?name=${encodeURIComponent(query)}`);
+    const data = await res.json();
+
+    if (!res.ok || data.error) {
+      throw new Error(data.error || 'Something went wrong.');
+    }
+
+    document.getElementById('resultIcon').src = data.icon || '';
+    document.getElementById('resultName').textContent = data.name;
+    document.getElementById('resultPlaying').textContent = data.playing?.toLocaleString() ?? '0';
+    document.getElementById('universeId').textContent = data.universeId;
+    document.getElementById('placeId').textContent = data.placeId;
+
+    result.classList.add('show');
+    statusLine.textContent = `Match found.`;
+  } catch (err) {
+    statusLine.classList.add('err');
+    statusLine.textContent = err.message || 'No matching game found.';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Search';
+  }
+});
+
+document.querySelectorAll('.copy-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    const val = document.getElementById(b.dataset.copy).textContent;
+    navigator.clipboard.writeText(val);
+    const original = b.textContent;
+    b.textContent = 'copied!';
+    setTimeout(() => b.textContent = original, 1200);
+  });
+});
+</script>
+
+</body>
+</html>
